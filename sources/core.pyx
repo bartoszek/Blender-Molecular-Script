@@ -7,7 +7,7 @@
 
 
 cimport cython
-from time import clock
+from time import time
 from cython.parallel import parallel, prange, threadid
 from libc.stdlib cimport malloc, realloc, free, rand, srand, abs
 
@@ -291,14 +291,14 @@ cpdef simulate(importdata):
         deadlinks[i] = 0
     if profiling == 1:
         print("-->start simulate")
-        stime2 = clock()
-        stime = clock()
+        stime2 = time()
+        stime = time()
 
     update(importdata)
 
     if profiling == 1:
-        print("-->update time", clock() - stime, "sec")
-        stime = clock()
+        print("-->update time", time() - stime, "sec")
+        stime = time()
 
     for i in xrange(parnum):
         parlistcopy[i].id = parlist[i].id
@@ -414,8 +414,8 @@ cpdef simulate(importdata):
             (parPool[0].parity[pair].heap[heaps].parnum - 1)] = parlist[i].id
 
     if profiling == 1:
-        print("-->copy data time", clock() - stime, "sec")
-        stime = clock()
+        print("-->copy data time", time() - stime, "sec")
+        stime = time()
 
     KDTree_create_tree(kdtree, parlistcopy, 0, parnum - 1, 0, -1, 0, 1)
 
@@ -438,8 +438,8 @@ cpdef simulate(importdata):
             )
 
     if profiling == 1:
-        print("-->create tree time", clock() - stime,"sec")
-        stime = clock()
+        print("-->create tree time", time() - stime,"sec")
+        stime = time()
 
     with nogil:
         for i in prange(
@@ -456,8 +456,8 @@ cpdef simulate(importdata):
             )
 
     if profiling == 1:
-        print("-->neighbours time", clock() - stime, "sec")
-        stime = clock()
+        print("-->neighbours time", time() - stime, "sec")
+        stime = time()
 
     with nogil:
         for pair in xrange(2):
@@ -498,8 +498,8 @@ cpdef simulate(importdata):
     '''
 
     if profiling == 1:
-        print("-->collide/solve link time", clock() - stime, "sec")
-        stime = clock()
+        print("-->collide/solve link time", time() - stime, "sec")
+        stime = time()
 
     exportdata = []
     parloc = []
@@ -544,8 +544,8 @@ cpdef simulate(importdata):
     free(parPool)
 
     if profiling == 1:
-        print("-->export time", clock() - stime, "sec")
-        print("-->all process time", clock() - stime2, "sec")
+        print("-->export time", time() - stime, "sec")
+        print("-->all process time", time() - stime2, "sec")
     return exportdata
 
 

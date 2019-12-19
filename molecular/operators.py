@@ -1,7 +1,7 @@
 
 import sys
 import platform
-from time import clock, sleep, strftime, gmtime
+from time import time, sleep, strftime, gmtime
 
 import bpy
 from mathutils import Vector
@@ -16,10 +16,14 @@ if sys.version_info.major == 3 and sys.version_info.minor == 5 and bit_depth == 
     from . import core_35_64 as core
 elif sys.version_info.major == 3 and sys.version_info.minor == 7 and bit_depth == '64bit':
     from . import core_37_64 as core
+elif sys.version_info.major == 3 and sys.version_info.minor == 8 and bit_depth == '64bit':
+    from . import core_38_64 as core
 elif sys.version_info.major == 3 and sys.version_info.minor == 5 and bit_depth == '32bit':
     from . import core_35_32 as core
 elif sys.version_info.major == 3 and sys.version_info.minor == 7 and bit_depth == '32bit':
     from . import core_37_32 as core
+elif sys.version_info.major == 3 and sys.version_info.minor == 8 and bit_depth == '32bit':
+    from . import core_38_32 as core
 else:
     raise BaseException('Unsupported python version')
 
@@ -33,7 +37,7 @@ class MolSimulate(bpy.types.Operator):
             destroy_caches(ob)
 
         print("Molecular Sim start--------------------------------------------------")
-        mol_stime = clock()
+        mol_stime = time()
         scene = context.scene
         scene.mol_simrun = True
         scene.mol_minsize = 1000000000.0
@@ -59,13 +63,13 @@ class MolSimulate(bpy.types.Operator):
         mol_exportdata = context.scene.mol_exportdata
         mol_exportdata.clear()
         mol_exportdata.append([fps, mol_substep, 0, 0, cpu])
-        mol_stime = clock()
+        mol_stime = time()
         simulate.pack_data(context, True)
-        etime = clock()
+        etime = time()
         print("  PackData take " + str(round(etime - mol_stime, 3)) + "sec")
-        mol_stime = clock()
+        mol_stime = time()
         mol_report = core.init(mol_exportdata)
-        etime = clock()
+        etime = time()
         print("  Export time take " + str(round(etime - mol_stime, 3)) + "sec")
         print("  total numbers of particles: " + str(mol_report))
         print("  start processing:")
@@ -287,7 +291,7 @@ class MolSimulateModal(bpy.types.Operator):
 
         if event.type == 'TIMER':
             if frame_current == scene.frame_start:            
-                scene.mol_stime = clock()
+                scene.mol_stime = time()
             mol_exportdata = context.scene.mol_exportdata
             mol_exportdata.clear()
             simulate.pack_data(context, False)
@@ -305,7 +309,7 @@ class MolSimulateModal(bpy.types.Operator):
             mol_substep = scene.mol_substep
             framesubstep = frame_current / (mol_substep + 1)        
             if framesubstep == int(framesubstep):
-                etime = clock()
+                etime = time()
                 print("    frame " + str(framesubstep + 1) + ":")
                 print("      links created:", scene.mol_newlink)
                 if scene.mol_totallink:
@@ -318,8 +322,8 @@ class MolSimulateModal(bpy.types.Operator):
                 print("      Remaining estimated:", scene.mol_timeremain)
                 scene.mol_newlink = 0
                 scene.mol_deadlink = 0
-                scene.mol_stime = clock()
-                stime2 = clock()
+                scene.mol_stime = time()
+                stime2 = time()
             scene.mol_newlink += mol_importdata[2]
             scene.mol_deadlink += mol_importdata[3]
             scene.mol_totallink = mol_importdata[4]
@@ -329,9 +333,9 @@ class MolSimulateModal(bpy.types.Operator):
             scene.frame_set(frame=frame_current + 1)
             
             if framesubstep == int(framesubstep):
-                etime2 = clock()
+                etime2 = time()
                 print("      Blender: " + str(round(etime2 - stime2, 3)) + " sec")
-                stime2 = clock()
+                stime2 = time()
 
         return {'PASS_THROUGH'}
 
